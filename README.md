@@ -104,4 +104,3 @@ Use this tooling to fix the obvious issues first. Then get a real pentest.
 
 ---
 
-*BSPLOIT / OMEGA TRUST — Professional Penetration Testing & Security Advisory*
