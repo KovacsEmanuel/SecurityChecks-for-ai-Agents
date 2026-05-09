@@ -92,13 +92,13 @@ An orchestration plan is included that coordinates 9 specialized agents across 3
 
 ## ⚠️ Disclaimer
 
-The checks and agents in this repo perform **automated security hygiene** — they catch common, well-known issues: hardcoded secrets, outdated dependencies, missing headers, basic injection patterns, misconfigured permissions.
+The checks and agents in this repo perform **automated security hygiene**. They catch common, well-known issues: hardcoded secrets, outdated dependencies, missing headers, basic injection patterns, and misconfigured permissions.
 
 **This is not a penetration test.**
 
 Automated agents will not find business logic flaws, complex attack chains, race conditions, custom crypto issues, or anything that requires real adversarial thinking and application context. There is a significant gap between "passes these checks" and "is secure."
 
-**Every application should have a professional penetration test** performed by a certified security professional — before going to production, after major releases, and at minimum once per year. This is non-negotiable for applications handling financial data, PII, authentication, or anything regulated.
+**Every application should have a professional penetration test** performed by a certified security professional before going to production, after major releases, and at a minimum once per year. This is required for applications that handle financial data, PII, authentication, or anything regulated.
 
 Use this tooling to fix the obvious issues first. Then get a real pentest.
 
