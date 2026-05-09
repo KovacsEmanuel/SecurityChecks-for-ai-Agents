@@ -1,0 +1,744 @@
+================================================================
+AI APP SECURITY CHECKLIST — MASTER EDITION v3.0
+BSPLOIT / OMEGA TRUST
+================================================================
+ALIGNED WITH:
+  OWASP Top 10:2025 · MITRE CWE Top 25:2024 · NIST SP 800-53
+  OWASP ASVS 4.0 · OWASP API Security Top 10:2023
+  PTES · PSTG (OWASP Testing Guide v4.2)
+
+FRAMEWORK COVERAGE:
+  Web: React/Next.js · Vue/Nuxt · Angular · SvelteKit
+  Desktop: Tauri v2 · Electron · .NET MAUI · Qt
+  Mobile: Flutter · React Native · Kotlin Multiplatform
+  Backend: Node.js/Express · FastAPI/Flask/Django · Spring Boot · Go
+  API: REST · GraphQL · gRPC · WebSocket
+  CLI/Linux · Container/Cloud · AI/LLM apps
+
+AGENT INSTRUCTIONS:
+  - Each check is standalone and testable by an automated agent
+  - [SCAN] = can be detected via static analysis or automated scan
+  - [MANUAL] = requires manual review or dynamic testing
+  - [CONFIG] = check configuration files / manifests
+  - [CODE] = requires source code review
+  - SEVERITY: CRITICAL / HIGH / MEDIUM / LOW
+  - All CWE/OWASP/NIST references are included per check
+  - Return format: CHECK_ID | STATUS (PASS/FAIL/NA) | EVIDENCE
+
+FRAMEWORK MAPPING KEY:
+  [OW-A01] OWASP 2025: Broken Access Control
+  [OW-A02] OWASP 2025: Security Misconfiguration
+  [OW-A03] OWASP 2025: Software Supply Chain Failures
+  [OW-A04] OWASP 2025: Cryptographic Failures
+  [OW-A05] OWASP 2025: Injection
+  [OW-A06] OWASP 2025: Insecure Design
+  [OW-A07] OWASP 2025: Identification & Auth Failures
+  [OW-A08] OWASP 2025: Software & Data Integrity Failures
+  [OW-A09] OWASP 2025: Security Logging & Monitoring Failures
+  [OW-A10] OWASP 2025: Mishandling of Exceptional Conditions
+  [API-1]  OWASP API Security: Broken Object Level Authorization
+  [API-2]  OWASP API Security: Broken Authentication
+  [API-3]  OWASP API Security: Broken Object Property Level Auth
+  [API-4]  OWASP API Security: Unrestricted Resource Consumption
+  [API-5]  OWASP API Security: Broken Function Level Authorization
+  [CWE-N]  MITRE CWE identifier
+================================================================
+
+
+SECTION 1 — AUTHENTICATION & SESSION SECURITY
+Ref: [OW-A07] [ASVS V2] [API-2] [NIST IA-*]
+----------------------------------------------------------------
+1.1  [CRITICAL][CONFIG][SCAN]  Cookie flags: HttpOnly + Secure + SameSite=Strict/Lax on all session cookies — CWE-614
+1.2  [CRITICAL][CODE][MANUAL]  Refresh token rotation: invalidate on use, detect reuse, bind to device fingerprint — CWE-287
+1.3  [HIGH][CONFIG][SCAN]      Brute-force protection: rate limit + lockout + CAPTCHA after N failures on auth endpoints — CWE-307
+1.4  [HIGH][CODE][SCAN]        Logout invalidation: server-side session revocation for all tokens/sessions on logout — CWE-613
+1.5  [CRITICAL][CODE][SCAN]    JWT validation: verify alg, exp, iss, aud; reject 'none' alg; prefer RS256/ES256 — CWE-347
+1.6  [HIGH][CONFIG][MANUAL]    MFA enforcement: required for admin roles and all privilege-sensitive actions — CWE-308
+1.7  [MEDIUM][CODE][MANUAL]    Credential stuffing protection: HaveIBeenPwned check on registration and login — CWE-307
+1.8  [MEDIUM][CONFIG][SCAN]    Password policy: min 12 chars, reject breached passwords, no composition-only rules — CWE-521
+1.9  [CRITICAL][CONFIG][SCAN]  OAuth2/OIDC: strict redirect_uri whitelist, PKCE for public clients, state CSRF param — CWE-601
+1.10 [HIGH][CODE][SCAN]        Token storage: no tokens in localStorage/sessionStorage; use httpOnly cookies — CWE-922
+1.11 [HIGH][CODE][SCAN]        Session fixation: regenerate session ID after successful authentication — CWE-384
+1.12 [MEDIUM][CONFIG][MANUAL]  Concurrent session control: configurable limit, notify on new device login — CWE-287
+1.13 [MEDIUM][CODE][SCAN]      Account enumeration: identical error messages for invalid user vs wrong password — CWE-204
+1.14 [HIGH][CODE][SCAN]        Timing attack: constant-time comparison for all token/hash/secret comparisons — CWE-208
+1.15 [CRITICAL][CONFIG][SCAN]  Default credentials: no default user/pass in any deployed component — OW-A02
+1.16 [HIGH][CODE][MANUAL]      Password reset flow: secure random token, short expiry, single-use, no URL leakage — CWE-640
+1.17 [HIGH][CODE][MANUAL]      Auth bypass via null/empty: no bypass by sending null, empty, or 0 as credentials — CWE-287
+1.18 [MEDIUM][CODE][MANUAL]    Step-up authentication: re-verify identity before critical operations (delete, export) — ASVS-V2.7
+
+
+SECTION 2 — AUTHORIZATION & ACCESS CONTROL
+Ref: [OW-A01] [API-1] [API-5] [ASVS V4] [NIST AC-*]
+----------------------------------------------------------------
+2.1  [CRITICAL][CODE][SCAN]    Route/endpoint protection: every handler enforces auth check before business logic — CWE-306
+2.2  [CRITICAL][CODE][MANUAL]  RBAC enforcement: role checks server-side only, never client-side flags/cookies — CWE-284
+2.3  [CRITICAL][CONFIG][SCAN]  Least privilege: API keys/service accounts have minimum required permissions — CWE-250
+2.4  [CRITICAL][CODE][MANUAL]  IDOR: ownership check on every read/write/delete before accessing resource by ID — CWE-639
+2.5  [CRITICAL][CONFIG][SCAN]  Database RLS: row-level security policies active with default-deny approach — OW-A01
+2.6  [CRITICAL][CODE][MANUAL]  Horizontal privilege escalation: User A cannot access User B's resources via ID swap — CWE-639
+2.7  [CRITICAL][CODE][MANUAL]  Vertical privilege escalation: regular users cannot reach admin-only functions — CWE-269
+2.8  [HIGH][CODE][SCAN]        Mass assignment: whitelist allowed fields; block role/isAdmin/plan param overwrite — CWE-915
+2.9  [CRITICAL][CODE][MANUAL]  Function-level authorization: admin operations verify admin role server-side — CWE-285
+2.10 [HIGH][CODE][MANUAL]      Resource-based access: check object permissions at resource level, not route level — API-1
+2.11 [CRITICAL][CODE][MANUAL]  AI agent authorization: agents validate user permissions before each tool action — OW-A01
+2.12 [CRITICAL][CODE][MANUAL]  AI tool/function permissions: tool calls scoped to invoking user's role — OW-A01
+2.13 [HIGH][CODE][SCAN]        Forced browsing: unauthenticated access to protected paths blocked — CWE-425
+2.14 [HIGH][CODE][SCAN]        Path-based bypass: encoded/normalized paths cannot bypass access controls — CWE-22
+2.15 [CRITICAL][CODE][MANUAL]  BOLA (GraphQL/REST): object-level authorization on every resolver/endpoint — API-1
+2.16 [HIGH][CODE][MANUAL]      JWT claim manipulation: alg confusion, unsigned token, tampered payload rejected — CWE-345
+2.17 [HIGH][CODE][MANUAL]      API versioning: deprecated API versions enforce same access controls as current — API-5
+2.18 [MEDIUM][CODE][MANUAL]    Wildcard permissions: no *.* or admin:* grants in any permission scheme — CWE-732
+
+
+SECTION 3 — INPUT & OUTPUT SECURITY
+Ref: [OW-A05] [ASVS V5] [NIST SI-10]
+----------------------------------------------------------------
+3.1  [CRITICAL][CODE][SCAN]    XSS Stored: sanitize all user input before storing and before rendering — CWE-79
+3.2  [HIGH][CODE][SCAN]        XSS Reflected: encode URL params and headers reflected in HTML responses — CWE-79
+3.3  [HIGH][CODE][SCAN]        XSS DOM: no innerHTML/outerHTML/eval/document.write with user-controlled data — CWE-79
+3.4  [CRITICAL][CODE][SCAN]    SQLi: parameterized queries or ORM on every DB interaction, zero concatenation — CWE-89
+3.5  [HIGH][CODE][SCAN]        NoSQL injection: sanitize MongoDB $where/$regex operators from user input — CWE-943
+3.6  [CRITICAL][CODE][SCAN]    OS command injection: no user input in shell commands; use execvp-style APIs — CWE-78
+3.7  [HIGH][CODE][SCAN]        LDAP injection: escape user input before LDAP filter construction — CWE-90
+3.8  [HIGH][CODE][SCAN]        XPath/XML injection: disable DTDs and sanitize before XPath evaluation — CWE-611/643
+3.9  [HIGH][CODE][SCAN]        CSRF: CSRF tokens on all state-changing requests + Origin/Referer validation — CWE-352
+3.10 [CRITICAL][CODE][SCAN]    SSRF: block RFC-1918/loopback in user-supplied URLs; strict allowlist for fetches — CWE-918
+3.11 [HIGH][CODE][MANUAL]      File upload: validate MIME + extension + magic bytes + size; store outside webroot — CWE-434
+3.12 [HIGH][CODE][SCAN]        Path traversal: block ../ sequences; validate realpath() against allowed base dir — CWE-22
+3.13 [CRITICAL][CODE][SCAN]    SSTI: never render user input as template code in any template engine — CWE-94
+3.14 [CRITICAL][CODE][MANUAL]  Prompt injection (direct): user input sanitized before LLM system/user role merge — OW-A05
+3.15 [CRITICAL][CODE][MANUAL]  Prompt injection (indirect): RAG/tool/web outputs sanitized before LLM context — OW-A05
+3.16 [HIGH][CODE][MANUAL]      LLM output: validate and sanitize AI-generated content before rendering/executing — OW-A05
+3.17 [CRITICAL][CODE][SCAN]    AI HTML output: DOMPurify or equivalent applied to all AI-generated markup — CWE-79
+3.18 [MEDIUM][CODE][SCAN]      Schema validation: all API request payloads validated against strict schema — CWE-20
+3.19 [HIGH][CODE][SCAN]        HTTP header injection: sanitize CRLF sequences in user-controlled header values — CWE-113
+3.20 [HIGH][CODE][SCAN]        Open redirect: redirect targets validated against strict allowlist — CWE-601
+3.21 [HIGH][CODE][SCAN]        Integer overflow: numeric bounds validated on all user-controlled integers — CWE-190
+3.22 [CRITICAL][CODE][SCAN]    Insecure deserialization: never deserialize untrusted data with pickle/Java OIS — CWE-502
+3.23 [HIGH][CODE][SCAN]        XXE: XML parsers have DTD processing and external entities disabled — CWE-611
+3.24 [HIGH][CODE][SCAN]        Expression language injection: EL evaluation sandboxed (Spring, JSF, etc.) — CWE-917
+3.25 [MEDIUM][CODE][SCAN]      ReDoS: all regex patterns audited for catastrophic backtracking — CWE-1333
+3.26 [MEDIUM][CODE][SCAN]      CSV injection: cells prefixed to block formula execution in spreadsheet apps — CWE-1236
+3.27 [HIGH][CODE][SCAN]        GraphQL injection: variables used not string interpolation in query construction — CWE-89
+3.28 [HIGH][CODE][MANUAL]      Second-order injection: sanitized input re-evaluated unsafely later in flow — CWE-89
+
+
+SECTION 4 — CRYPTOGRAPHY & DATA PROTECTION
+Ref: [OW-A04] [ASVS V6] [NIST SC-*] [CWE-310 cluster]
+----------------------------------------------------------------
+4.1  [CRITICAL][CODE][SCAN]    Password hashing: bcrypt/Argon2/scrypt only; no MD5/SHA-1/SHA-256 for passwords — CWE-916
+4.2  [CRITICAL][CODE][SCAN]    CSPRNG: crypto.randomBytes/secrets.token_hex for all tokens; no Math.random() — CWE-338
+4.3  [CRITICAL][CODE][SCAN]    Hardcoded secrets: no API keys/passwords/tokens in source code or config files — CWE-798
+4.4  [HIGH][CONFIG][SCAN]      Key length: RSA >= 2048-bit, ECC >= 256-bit, AES >= 128-bit — CWE-326
+4.5  [HIGH][CODE][SCAN]        Cipher mode: no ECB mode; AES-GCM or AES-CBC with HMAC for encryption — CWE-327
+4.6  [CRITICAL][CONFIG][SCAN]  TLS everywhere: all data in transit encrypted; no plaintext channels — CWE-319
+4.7  [HIGH][CODE][SCAN]        Sensitive data in URLs: no PII/tokens in query strings or path params — CWE-598
+4.8  [HIGH][CODE][SCAN]        Sensitive data in logs: passwords/tokens/PII never written to log output — CWE-532
+4.9  [HIGH][CONFIG][SCAN]      Encryption at rest: sensitive DB columns encrypted; disk volumes protected — NIST SC-28
+4.10 [CRITICAL][CODE][SCAN]    Certificate validation: TLS cert errors never suppressed/ignored in code — CWE-295
+4.11 [HIGH][CODE][SCAN]        Predictable tokens: session/reset/API tokens use CSPRNG, min 128-bit entropy — CWE-340
+4.12 [HIGH][CONFIG][MANUAL]    Key management: rotation policy defined; keys stored in vault not on disk — NIST SC-12
+4.13 [HIGH][CODE][SCAN]        JWT weak secret: HS256 with short/known key rejected; use RS256 or ES256 — CWE-347
+4.14 [MEDIUM][CODE][SCAN]      Sensitive data in cache: HTTP cache-control headers prevent caching of sensitive pages — CWE-525
+4.15 [MEDIUM][CODE][SCAN]      Sensitive data in memory: secrets zeroed/overwritten after use, not left on heap — CWE-316
+
+
+SECTION 5 — SERVER & INFRASTRUCTURE HARDENING
+Ref: [OW-A02] [ASVS V14] [NIST CM-*]
+----------------------------------------------------------------
+5.1  [CRITICAL][CONFIG][SCAN]  Secrets in env: no hardcoded secrets; use .env files + vault; anon vs service_role — CWE-798
+5.2  [HIGH][CONFIG][SCAN]      HTTPS + HSTS: force HTTPS everywhere; HSTS with includeSubDomains + preload — CWE-319
+5.3  [HIGH][CONFIG][SCAN]      CORS: no wildcard (*) origin on authenticated endpoints; explicit allowlist — CWE-942
+5.4  [HIGH][CONFIG][SCAN]      Security headers: CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy — OW-A02
+5.5  [HIGH][CONFIG][SCAN]      Rate limiting: per-IP and per-user on all API endpoints; exponential backoff on auth — CWE-770
+5.6  [HIGH][CODE][SCAN]        Error handling: no stack traces/internal paths in API error responses — CWE-209/OW-A10
+5.7  [HIGH][CONFIG][SCAN]      Container: non-root user, read-only FS, no --privileged, image CVE scan — CWE-250
+5.8  [CRITICAL][CONFIG][SCAN]  Network segmentation: DB not internet-exposed; internal services on private net — NIST SC-7
+5.9  [HIGH][CONFIG][SCAN]      TLS config: TLS 1.2+ minimum; disable SSLv3/TLS1.0/1.1; no weak ciphers (RC4/3DES) — CWE-326
+5.10 [HIGH][CONFIG][SCAN]      Debug mode: disabled in production (Flask DEBUG=False, Django, Next.js, etc.) — OW-A02
+5.11 [MEDIUM][CONFIG][SCAN]    Directory listing: autoindex/directory browsing disabled on all web servers — OW-A02
+5.12 [HIGH][CONFIG][SCAN]      HTTP methods: TRACE/CONNECT/TRACK disabled; OPTIONS restricted in production — OW-A02
+5.13 [MEDIUM][CONFIG][SCAN]    Error pages: custom 4xx/5xx pages; no framework version or server disclosure — CWE-200
+5.14 [HIGH][CONFIG][SCAN]      IaC security: Terraform/Helm/CloudFormation scanned for misconfigs — OW-A02
+5.15 [CRITICAL][CONFIG][SCAN]  Cloud storage: S3/GCS/Azure Blob buckets not publicly writable — OW-A02
+5.16 [CRITICAL][CONFIG][SCAN]  Cloud metadata: block access to 169.254.169.254 IMDS from app tier — CWE-918
+5.17 [HIGH][CONFIG][SCAN]      Clickjacking: X-Frame-Options DENY or CSP frame-ancestors 'none' — CWE-1021
+5.18 [HIGH][CONFIG][MANUAL]    AI endpoint: LLM API keys rotated; per-user token budget enforced — OW-A02
+5.19 [HIGH][CONFIG][SCAN]      Backup encryption: backups encrypted at rest; restore tested quarterly — NIST CP-9
+5.20 [MEDIUM][CONFIG][SCAN]    IMDSv2 enforced: AWS instances require IMDSv2; v1 disabled — CWE-918
+
+
+SECTION 6 — SOFTWARE SUPPLY CHAIN
+Ref: [OW-A03] [OW-A08] [NIST SA-12]
+----------------------------------------------------------------
+6.1  [HIGH][SCAN][CONFIG]      Dependency CVE scan: npm audit/pip-audit/cargo audit run in CI pipeline — CWE-1104
+6.2  [HIGH][CONFIG][SCAN]      Pinned versions: lockfiles committed; no floating ranges (^, ~, *) — CWE-1104
+6.3  [HIGH][MANUAL][SCAN]      Typosquatting: verify exact package names; check for lookalike packages — OW-A03
+6.4  [MEDIUM][CONFIG][MANUAL]  SBOM: Software Bill of Materials generated and maintained per release — OW-A03
+6.5  [HIGH][CONFIG][SCAN]      CI/CD pipeline: signed commits; protected main branch; no secrets in env — OW-A08
+6.6  [HIGH][CONFIG][MANUAL]    Build artifact integrity: artifacts signed and signature verified on deploy — OW-A08
+6.7  [HIGH][SCAN][CONFIG]      Third-party script SRI: integrity hash on all external JS/CSS includes — OW-A08
+6.8  [HIGH][SCAN][CONFIG]      Container base images: minimal (distroless/alpine), regularly updated — OW-A03
+6.9  [CRITICAL][SCAN][CONFIG]  Secrets in git history: truffleHog/gitleaks scan on full repo history — CWE-798
+6.10 [HIGH][CONFIG][SCAN]      Dependency confusion: private package registries take priority over public — OW-A03
+6.11 [MEDIUM][MANUAL][SCAN]    Malicious package detection: maintainer integrity; no post-install scripts — OW-A03
+
+
+SECTION 7 — AI-SPECIFIC SECURITY
+Ref: OWASP LLM Top 10:2025 · MITRE ATLAS · NIST AI RMF
+----------------------------------------------------------------
+7.1  [CRITICAL][CODE][MANUAL]  Prompt injection (direct): user input never directly merged into system prompt — LLM01
+7.2  [CRITICAL][CODE][MANUAL]  Prompt injection (indirect): RAG/tool/browser results sanitized before LLM — LLM02
+7.3  [CRITICAL][CODE][MANUAL]  Insecure tool calling: tool commands validate caller auth before execution — LLM07
+7.4  [HIGH][CONFIG][SCAN]      Model DoS: per-request and per-user token budgets enforced at API layer — LLM04
+7.5  [CRITICAL][CODE][MANUAL]  PII in prompts: sensitive data redacted before sending to external LLM API — LLM06
+7.6  [HIGH][CODE][MANUAL]      AI agent scope: agent actions limited to explicitly granted tool permissions — LLM08
+7.7  [HIGH][CODE][MANUAL]      Jailbreak resistance: tested for DAN, roleplay, base64, many-shot, virtualization — LLM01
+7.8  [CRITICAL][CODE][MANUAL]  Cross-user LLM leak: user A's context never accessible to user B — LLM06
+7.9  [HIGH][CONFIG][MANUAL]    LLM provider trust: data retention policies reviewed; EU data residency verified — LLM09
+7.10 [HIGH][CODE][MANUAL]      Context window poisoning: context reset before privilege-sensitive operations — LLM02
+7.11 [CRITICAL][CODE][MANUAL]  System prompt disclosure: system prompt not extractable via user interaction — LLM01
+7.12 [HIGH][CODE][MANUAL]      Agentic loop: max iteration limit prevents infinite agent recursion — LLM08
+7.13 [HIGH][CODE][MANUAL]      Insecure MCP/plugin: third-party plugins treated as untrusted; outputs sandboxed — LLM07
+7.14 [MEDIUM][CODE][MANUAL]    Model extraction: limit repetitive structured queries that reconstruct training data — LLM10
+7.15 [HIGH][CODE][MANUAL]      Shadow prompting: whitespace/encoding used to hide instructions in content — LLM02
+7.16 [CRITICAL][CODE][SCAN]    AI output HTML rendering: AI responses sanitized with DOMPurify before innerHTML — LLM02
+7.17 [HIGH][CODE][MANUAL]      Hallucination guard: AI output validated before use in security-critical decisions — LLM09
+7.18 [MEDIUM][CONFIG][MANUAL]  Prompt/response log retention: defined policy, user consent, deletion supported — LLM06
+
+
+SECTION 8 — FRAMEWORK-SPECIFIC: WEB
+----------------------------------------------------------------
+---- React / Next.js ----
+8.1  [CRITICAL][CODE][SCAN]    React: dangerouslySetInnerHTML audited; DOMPurify applied on all instances — CWE-79
+8.2  [HIGH][CONFIG][SCAN]      Next.js: NEXT_PUBLIC_ prefix never used for secret keys or internal config — CWE-200
+8.3  [HIGH][CODE][MANUAL]      Next.js Server Actions: same-origin enforced; user session validated in every action — CWE-352
+8.4  [HIGH][CODE][SCAN]        Next.js: no user input in generateStaticParams used for path construction — CWE-22
+8.5  [MEDIUM][CONFIG][SCAN]    Next.js: next.config.js contentSecurityPolicy header configured — OW-A02
+
+---- Vue / Nuxt ----
+8.6  [CRITICAL][CODE][SCAN]    Vue: v-html directive never used with user-controlled content — CWE-79
+8.7  [HIGH][CODE][SCAN]        Nuxt: server routes enforce authentication middleware — CWE-306
+8.8  [HIGH][CONFIG][SCAN]      Nuxt: nuxt.config routeRules do not expose internal headers to client — CWE-200
+
+---- Angular ----
+8.9  [HIGH][CODE][SCAN]        Angular: bypassSecurityTrustHtml / bypassSecurityTrustUrl usage audited — CWE-79
+8.10 [HIGH][CODE][SCAN]        Angular: HttpClient interceptors validate response types before use — CWE-20
+8.11 [MEDIUM][CODE][SCAN]      Angular: route guards (canActivate) implemented for all protected routes — CWE-306
+
+---- SvelteKit ----
+8.12 [HIGH][CODE][SCAN]        SvelteKit: {@html} blocks audited; no user content passed without sanitization — CWE-79
+8.13 [HIGH][CODE][MANUAL]      SvelteKit: server-side load() functions verify session before data access — CWE-306
+8.14 [HIGH][CONFIG][SCAN]      SvelteKit: CSRF protection enabled in config (not disabled via handle hook) — CWE-352
+
+---- Ionic / Capacitor ----
+8.15 [HIGH][CONFIG][SCAN]      Capacitor: allowlist restricts which native APIs are accessible from WebView — CWE-284
+8.16 [HIGH][CONFIG][SCAN]      Ionic: Content-Security-Policy prevents inline scripts — OW-A02
+8.17 [MEDIUM][CONFIG][SCAN]    Capacitor plugins: only required native capabilities declared in plugin config — CWE-250
+
+
+SECTION 9 — FRAMEWORK-SPECIFIC: DESKTOP
+----------------------------------------------------------------
+---- Tauri v2 ----
+9.1  [CRITICAL][CONFIG][SCAN]  Tauri: capabilities/*.json defines minimum required permissions; no wildcard perms — CWE-284
+9.2  [CRITICAL][CONFIG][SCAN]  Tauri: CSP defined in tauri.conf.json; no unsafe-inline/unsafe-eval in script-src — CWE-79
+9.3  [CRITICAL][CODE][MANUAL]  Tauri: IPC commands validate input and caller origin before executing — CWE-20
+9.4  [HIGH][CONFIG][SCAN]      Tauri: filesystem scope restricted to $APPDATA/* or specific dirs; no $HOME — CWE-22
+9.5  [HIGH][CONFIG][SCAN]      Tauri: no dangerousRemoteDomainIpcAccess unless absolutely required — CWE-284
+9.6  [CRITICAL][CODE][MANUAL]  Tauri: iFrame origin check enforced (CVE-2024-35222); no IPC from remote iFrames — CWE-284
+9.7  [HIGH][CONFIG][SCAN]      Tauri: updater uses HTTPS endpoint with signature verification — CWE-494
+9.8  [HIGH][CODE][SCAN]        Tauri: Rust #[command] handlers validate and sanitize all parameters — CWE-20
+9.9  [MEDIUM][CODE][SCAN]      Tauri: no shell:execute or fs:write permissions unless strictly necessary — CWE-250
+9.10 [HIGH][CONFIG][SCAN]      Tauri: updater private key not stored in Vite env vars (CVE-2023) — CWE-798
+9.11 [HIGH][CODE][MANUAL]      Tauri: resource IDs sequentially allocated; window A cannot access window B's files — CWE-639
+9.12 [MEDIUM][CODE][SCAN]      Tauri: cargo audit run on src-tauri/Cargo.lock in CI — CWE-1104
+9.13 [HIGH][CONFIG][SCAN]      Tauri: dev server not bound to public interface when building for Android — CWE-319
+9.14 [MEDIUM][CONFIG][SCAN]    Tauri: isolation pattern (sandboxed iframe) enabled for sensitive command categories — CWE-284
+9.15 [LOW][CONFIG][SCAN]       Tauri: cargo-auditable used to embed SBOM in release binary — OW-A03
+
+---- Electron ----
+9.16 [CRITICAL][CONFIG][SCAN]  Electron: nodeIntegration: false in all renderer BrowserWindow configs — CWE-284
+9.17 [CRITICAL][CONFIG][SCAN]  Electron: contextIsolation: true in all renderer BrowserWindow configs — CWE-284
+9.18 [CRITICAL][CONFIG][SCAN]  Electron: sandbox: true enabled for all renderer processes — CWE-284
+9.19 [HIGH][CODE][SCAN]        Electron: all IPC messages validated in main process before processing — CWE-20
+9.20 [HIGH][CONFIG][SCAN]      Electron: allowRunningInsecureContent: false in all webPreferences — CWE-319
+9.21 [HIGH][CODE][MANUAL]      Electron: remote module disabled; no require() in renderer — CWE-284
+9.22 [HIGH][CONFIG][SCAN]      Electron: auto-updater uses HTTPS feed; signature verified before applying — CWE-494
+9.23 [CRITICAL][CODE][SCAN]    Electron: credentials stored via OS keychain (keytar), not plaintext files — CWE-312
+9.24 [HIGH][CODE][SCAN]        Electron: custom protocol handlers sanitize all URI parameters — CWE-88
+9.25 [MEDIUM][CONFIG][SCAN]    Electron: webSecurity: true (not disabled in production) — OW-A02
+
+---- .NET MAUI ----
+9.26 [HIGH][CONFIG][SCAN]      MAUI: permissions in AndroidManifest.xml / Info.plist match minimum required — CWE-250
+9.27 [HIGH][CODE][SCAN]        MAUI: SecureStorage used for credentials; no Preferences for sensitive data — CWE-312
+9.28 [HIGH][CODE][SCAN]        MAUI: WebView.Source validated; no user-controlled URL without sanitization — CWE-601
+9.29 [HIGH][CODE][SCAN]        MAUI: HttpClient validates TLS certificates; no custom validators — CWE-295
+9.30 [MEDIUM][CONFIG][SCAN]    MAUI: obfuscation applied to release builds for sensitive logic — OW-A06
+9.31 [MEDIUM][CODE][SCAN]      MAUI: SQLite database encrypted with SQLCipher or equivalent — CWE-311
+
+---- Qt ----
+9.32 [HIGH][CODE][SCAN]        Qt: QWebEngineView does not execute arbitrary JavaScript from user content — CWE-79
+9.33 [HIGH][CODE][SCAN]        Qt: SQL queries use QSqlQuery with bound parameters, not string format — CWE-89
+9.34 [HIGH][CODE][SCAN]        Qt: QProcess called with explicit argument list, not shell=true equivalent — CWE-78
+9.35 [MEDIUM][CONFIG][SCAN]    Qt: Qt Keychain used for credential storage on all platforms — CWE-312
+9.36 [MEDIUM][CODE][SCAN]      Qt: QNetworkRequest validates SSL errors; no sslErrors() signal ignored — CWE-295
+
+
+SECTION 10 — FRAMEWORK-SPECIFIC: MOBILE
+----------------------------------------------------------------
+---- Flutter ----
+10.1  [HIGH][CONFIG][SCAN]     Flutter Android: AndroidManifest.xml contains only required permissions — CWE-250
+10.2  [HIGH][CONFIG][SCAN]     Flutter iOS: Info.plist NSUsageDescription present for each requested permission — CWE-250
+10.3  [CRITICAL][CODE][SCAN]   Flutter: flutter_secure_storage used for tokens; no SharedPreferences for secrets — CWE-312
+10.4  [HIGH][CODE][SCAN]       Flutter: no hardcoded API keys or secrets in Dart source files — CWE-798
+10.5  [HIGH][CONFIG][SCAN]     Flutter: android:debuggable=false and android:allowBackup=false in release manifest — OW-A02
+10.6  [HIGH][CODE][SCAN]       Flutter: http package enforces certificate validation; no BadCertificateCallback overrides — CWE-295
+10.7  [HIGH][CODE][SCAN]       Flutter WebView: javascriptMode restricted; no execution of untrusted JS — CWE-79
+10.8  [MEDIUM][CODE][SCAN]     Flutter: obfuscate: true in build config for release APK/IPA — OW-A06
+10.9  [HIGH][CODE][MANUAL]     Flutter: deep link handling validates all parameters before use — CWE-601
+10.10 [MEDIUM][CONFIG][SCAN]   Flutter: screenshot protection enabled on sensitive screens (FLAG_SECURE / iOS) — CWE-200
+
+---- React Native ----
+10.11 [CRITICAL][CODE][SCAN]   RN: no sensitive data in AsyncStorage; use react-native-keychain — CWE-312
+10.12 [HIGH][CONFIG][SCAN]     RN: Hermes engine enabled; JS bundle obfuscation applied for release — OW-A06
+10.13 [HIGH][CODE][SCAN]       RN: WebView has javaScriptEnabled=false for non-interactive content views — CWE-79
+10.14 [HIGH][CONFIG][SCAN]     RN: cleartext traffic disabled (Android) / NSAllowsArbitraryLoads=false (iOS) — CWE-319
+10.15 [HIGH][CODE][SCAN]       RN: no hardcoded secrets in JS bundle or native bridge code — CWE-798
+10.16 [MEDIUM][CODE][SCAN]     RN: NativeModules exposed to JS validate all parameters before native call — CWE-20
+10.17 [HIGH][CODE][MANUAL]     RN: deep links (Linking API) validate and sanitize all route parameters — CWE-601
+10.18 [HIGH][CONFIG][SCAN]     RN: Android exported activities/services set to false unless required — CWE-926
+
+---- Kotlin Multiplatform (KMP) ----
+10.19 [CRITICAL][CODE][SCAN]   KMP: Multiplatform Settings stores only non-sensitive config; use KeyStore for secrets — CWE-312
+10.20 [HIGH][CODE][SCAN]       KMP: Ktor client verifies TLS certificates; no custom trust managers that accept all — CWE-295
+10.21 [HIGH][CODE][SCAN]       KMP: shared business logic validates all inputs before platform-specific execution — CWE-20
+10.22 [HIGH][CONFIG][SCAN]     KMP Android: R8/ProGuard rules applied; no sensitive class names in release binary — OW-A06
+10.23 [MEDIUM][CODE][SCAN]     KMP: SQL Delight queries use parameterized statements — CWE-89
+
+
+SECTION 11 — FRAMEWORK-SPECIFIC: BACKEND API
+----------------------------------------------------------------
+---- Node.js / Express ----
+11.1  [HIGH][CODE][SCAN]       Express: helmet.js applied on all routes; CSP, HSTS, noSniff configured — OW-A02
+11.2  [HIGH][CODE][SCAN]       Express: express-rate-limit applied on auth and sensitive routes — CWE-770
+11.3  [HIGH][CODE][SCAN]       Node: prototype pollution: merge/assign operations use safe libraries — CWE-1321
+11.4  [HIGH][CODE][SCAN]       Node: child_process.exec never used with user input; use spawn with arg array — CWE-78
+11.5  [MEDIUM][CODE][SCAN]     Express: response.json() does not serialize prototype chain — CWE-915
+
+---- Python (FastAPI / Flask / Django) ----
+11.6  [CRITICAL][CODE][SCAN]   Python: pickle/shelve/yaml.load(Loader=None) never used with untrusted input — CWE-502
+11.7  [HIGH][CODE][SCAN]       Django: CSRF middleware enabled; not exempted on sensitive views — CWE-352
+11.8  [HIGH][CONFIG][SCAN]     Django: DEBUG=False; ALLOWED_HOSTS not wildcard in production — OW-A02
+11.9  [HIGH][CODE][SCAN]       FastAPI: Pydantic models validate all request fields; no model with **kwargs — CWE-20
+11.10 [HIGH][CODE][SCAN]       Flask: SECRET_KEY randomly generated; not hardcoded or empty string — CWE-798
+11.11 [HIGH][CODE][SCAN]       Python: subprocess called with shell=False and explicit list arguments — CWE-78
+11.12 [MEDIUM][CODE][SCAN]     Python: bandit SAST scan passes with no high-severity findings in CI — SCAN
+
+---- Go ----
+11.13 [HIGH][CODE][SCAN]       Go: html/template used not text/template for HTML rendering — CWE-79
+11.14 [HIGH][CODE][SCAN]       Go: database/sql uses parameterized queries; no fmt.Sprintf in SQL — CWE-89
+11.15 [HIGH][CODE][SCAN]       Go: exec.Command uses explicit argument list; no shell string — CWE-78
+11.16 [MEDIUM][CODE][SCAN]     Go: gosec scan passes with no high-severity findings in CI — SCAN
+
+---- Java / Spring Boot ----
+11.17 [HIGH][CODE][SCAN]       Spring: @PreAuthorize annotations on all sensitive endpoints — CWE-285
+11.18 [HIGH][CODE][SCAN]       Spring: Spring Security CSRF protection enabled; not disabled — CWE-352
+11.19 [CRITICAL][CODE][SCAN]   Java: ObjectInputStream deserialization blocked or uses allowlist — CWE-502
+11.20 [HIGH][CODE][SCAN]       Spring: JPA/Hibernate uses named parameters; no JPQL string concatenation — CWE-89
+11.21 [MEDIUM][CONFIG][SCAN]   Spring Boot: Actuator endpoints secured or disabled in production — OW-A02
+
+---- GraphQL ----
+11.22 [HIGH][CONFIG][SCAN]     GraphQL: query depth limit configured (max 5–10 levels) — CWE-770
+11.23 [HIGH][CONFIG][SCAN]     GraphQL: query complexity scoring enabled; max cost threshold set — CWE-770
+11.24 [HIGH][CONFIG][SCAN]     GraphQL: introspection disabled in production environment — OW-A02
+11.25 [CRITICAL][CODE][MANUAL] GraphQL: object-level authorization on every resolver (BOLA) — API-1
+11.26 [HIGH][CODE][SCAN]       GraphQL: batching attack prevented; no unlimited alias/fragment queries — CWE-770
+
+---- gRPC ----
+11.27 [CRITICAL][CONFIG][SCAN] gRPC: mutual TLS (mTLS) enforced between services — CWE-319
+11.28 [HIGH][CODE][SCAN]       gRPC: interceptors validate authentication on every RPC method — CWE-306
+11.29 [HIGH][CODE][SCAN]       gRPC: message size limits configured; no unbounded stream consumption — CWE-770
+
+
+SECTION 12 — SECURITY CODE REVIEW
+Ref: [ASVS V1-V14] [CWE-1000 cluster] — [CODE] checks for agents
+----------------------------------------------------------------
+---- 12.1 DANGEROUS FUNCTIONS ----
+12.1.1  [CRITICAL][CODE][SCAN] eval()/exec()/Function() called with user-controlled input — CWE-78/94
+12.1.2  [CRITICAL][CODE][SCAN] os.system()/subprocess.shell=True with user input — CWE-78
+12.1.3  [CRITICAL][CODE][SCAN] strcpy/strcat/gets/sprintf without bounds checking (C/C++) — CWE-120
+12.1.4  [CRITICAL][CODE][SCAN] innerHTML/outerHTML/document.write with user-controlled strings — CWE-79
+12.1.5  [CRITICAL][CODE][SCAN] pickle.loads()/yaml.load(Loader=None)/marshal.loads() on untrusted data — CWE-502
+12.1.6  [CRITICAL][CODE][SCAN] Java ObjectInputStream.readObject() on untrusted data — CWE-502
+12.1.7  [HIGH][CODE][SCAN]     Math.random()/random.random() used for security-sensitive tokens — CWE-338
+12.1.8  [HIGH][CODE][SCAN]     printf format string takes user input as format argument — CWE-134
+12.1.9  [HIGH][CODE][SCAN]     file_get_contents()/fetch() on user-supplied URL without allowlist — CWE-918
+12.1.10 [HIGH][CODE][SCAN]     open()/fopen() called with user-controlled filename without path validation — CWE-22
+
+---- 12.2 AUTHENTICATION CODE ----
+12.2.1  [CRITICAL][CODE][SCAN] Custom authentication implementation (roll-your-own auth) — ASVS V2
+12.2.2  [CRITICAL][CODE][SCAN] Password or API key hardcoded in source or config — CWE-798
+12.2.3  [CRITICAL][CODE][SCAN] Password stored as plaintext or base64/MD5/SHA-1 hash — CWE-256/916
+12.2.4  [HIGH][CODE][MANUAL]   Auth check bypassable via race condition or null/empty value — CWE-362
+12.2.5  [HIGH][CODE][SCAN]     TODO/FIXME comments near auth checks suggesting incomplete protection — CWE-306
+12.2.6  [HIGH][CODE][SCAN]     Token comparison uses == instead of constant-time compare — CWE-208
+
+---- 12.3 AUTHORIZATION CODE ----
+12.3.1  [CRITICAL][CODE][SCAN] DB update/delete without ownership/role check before execution — CWE-639
+12.3.2  [CRITICAL][CODE][SCAN] Admin flag or role stored in JWT claims without server-side enforcement — CWE-285
+12.3.3  [HIGH][CODE][SCAN]     Object IDs sequential integers instead of UUID/random — CWE-340
+12.3.4  [HIGH][CODE][SCAN]     File access using user-supplied filename without path normalization — CWE-22
+12.3.5  [HIGH][CODE][MANUAL]   Role check present on route but absent on underlying service/DAO layer — CWE-285
+
+---- 12.4 INJECTION CODE ----
+12.4.1  [CRITICAL][CODE][SCAN] String concatenation into SQL query (+ / f-string / format()) — CWE-89
+12.4.2  [CRITICAL][CODE][SCAN] User input in shell command string (backtick, shell=True, exec()) — CWE-78
+12.4.3  [HIGH][CODE][SCAN]     User input reflected in HTML template without contextual encoding — CWE-79
+12.4.4  [HIGH][CODE][SCAN]     XML parsed without disabling DOCTYPE/entity resolution — CWE-611
+12.4.5  [HIGH][CODE][SCAN]     Regex pattern built from user input without sanitization — CWE-1333
+12.4.6  [HIGH][CODE][SCAN]     LDAP query built with string concatenation from user input — CWE-90
+12.4.7  [HIGH][CODE][SCAN]     User input used as key in object/dict lookup without sanitization — CWE-94
+
+---- 12.5 CRYPTOGRAPHY CODE ----
+12.5.1  [CRITICAL][CODE][SCAN] MD5/SHA-1 used for password hashing — CWE-916
+12.5.2  [CRITICAL][CODE][SCAN] Symmetric encryption key hardcoded in source — CWE-321
+12.5.3  [HIGH][CODE][SCAN]     Non-cryptographic RNG (rand/Math.random) used for tokens — CWE-338
+12.5.4  [HIGH][CODE][SCAN]     JWT signed with HS256 and weak/short secret key — CWE-347
+12.5.5  [HIGH][CODE][SCAN]     Sensitive data written to localStorage or sessionStorage — CWE-922
+12.5.6  [CRITICAL][CODE][SCAN] SSL/TLS certificate validation disabled or overridden — CWE-295
+12.5.7  [HIGH][CODE][SCAN]     AES used in ECB mode for data encryption — CWE-327
+
+---- 12.6 ERROR HANDLING CODE ----
+12.6.1  [HIGH][CODE][SCAN]     Stack trace or exception detail returned in API response body — CWE-209
+12.6.2  [CRITICAL][CODE][SCAN] Fail-open pattern: access granted when exception or null occurs — CWE-636
+12.6.3  [HIGH][CODE][SCAN]     Database error messages (table names, column names) in response — CWE-209
+12.6.4  [HIGH][CODE][SCAN]     NULL dereference without null check leading to crash/DoS — CWE-476
+12.6.5  [HIGH][CODE][SCAN]     DB connection/file handle not closed in error path (resource leak) — CWE-400
+12.6.6  [HIGH][CODE][SCAN]     Bare except/catch swallows security exceptions silently — CWE-390
+
+---- 12.7 BUSINESS LOGIC CODE ----
+12.7.1  [HIGH][CODE][MANUAL]   Price/quantity modifiable by user with no server-side validation — CWE-20
+12.7.2  [HIGH][CODE][MANUAL]   Race condition in balance/vote/credit operation (TOCTOU) — CWE-362
+12.7.3  [HIGH][CODE][MANUAL]   Workflow step skippable (checkout without payment, etc.) — OW-A06
+12.7.4  [MEDIUM][CODE][MANUAL] Negative value or zero-price accepted by server logic — CWE-20
+12.7.5  [HIGH][CODE][MANUAL]   Coupon/discount stacking without server-side limit — OW-A06
+12.7.6  [HIGH][CODE][MANUAL]   Time-based one-time token reusable multiple times — CWE-294
+
+---- 12.8 SECRETS & CONFIG CODE ----
+12.8.1  [CRITICAL][CODE][SCAN] API keys/DB URIs/private keys in any source file or comment — CWE-798
+12.8.2  [CRITICAL][CODE][SCAN] Secrets in .env files committed to version control — CWE-798
+12.8.3  [HIGH][CODE][SCAN]     Secrets in Docker build ARGs (visible in image history layers) — CWE-798
+12.8.4  [HIGH][CONFIG][SCAN]   Config files world-readable (chmod 644 or 777) on server — CWE-732
+12.8.5  [MEDIUM][CODE][SCAN]   Feature flags expose production data in development builds — CWE-200
+
+---- 12.9 MEMORY SAFETY CODE (C / C++ / unsafe Rust) ----
+12.9.1  [CRITICAL][CODE][SCAN] Buffer overflow: array write without bounds check — CWE-787
+12.9.2  [CRITICAL][CODE][SCAN] Out-of-bounds read: array read without bounds check — CWE-125
+12.9.3  [CRITICAL][CODE][SCAN] Use-after-free: pointer used after free() — CWE-416
+12.9.4  [CRITICAL][CODE][SCAN] Double-free: free() called twice on same pointer — CWE-415
+12.9.5  [HIGH][CODE][SCAN]     Integer overflow feeding into malloc/alloca size argument — CWE-190
+12.9.6  [HIGH][CODE][SCAN]     Format string: user-controlled string passed as printf format — CWE-134
+
+---- 12.10 AI INTEGRATION CODE ----
+12.10.1 [CRITICAL][CODE][SCAN] User input string-concatenated directly into LLM prompt — LLM01
+12.10.2 [CRITICAL][CODE][SCAN] System prompt content returned to user via error or extraction — LLM01
+12.10.3 [HIGH][CODE][SCAN]     AI response rendered as HTML without sanitization — LLM02/CWE-79
+12.10.4 [CRITICAL][CODE][SCAN] AI tool function executes OS command or DB query without auth check — LLM07
+12.10.5 [HIGH][CODE][SCAN]     No per-user/per-request token budget check before LLM call — LLM04
+12.10.6 [HIGH][CODE][SCAN]     Conversation history stored including PII without encryption — LLM06
+
+
+SECTION 13 — APPLICATION PERMISSIONS AUDIT
+Ref: [NIST AC-6] [CWE-250] [CWE-732] — [CONFIG][MANUAL]
+----------------------------------------------------------------
+---- 13.1 WINDOWS PERMISSIONS ----
+13.1.1  [CRITICAL][MANUAL]    Process/service does not run as SYSTEM or Administrator — CWE-250
+13.1.2  [CRITICAL][MANUAL]    Service binary path is quoted and has no space-based hijack vector — CWE-428
+13.1.3  [HIGH][MANUAL]        Service binary and directory not writable by low-priv users (icacls) — CWE-732
+13.1.4  [HIGH][MANUAL]        AlwaysInstallElevated registry keys both set to 0 — CWE-269
+13.1.5  [HIGH][MANUAL]        Registry keys used by app not writable by standard users (regedit/accesschk) — CWE-732
+13.1.6  [HIGH][MANUAL]        SeImpersonatePrivilege / SeAssignPrimaryTokenPrivilege not held by app service — CWE-269
+13.1.7  [HIGH][MANUAL]        Named pipes created with restrictive DACLs; not accessible to Everyone — CWE-732
+13.1.8  [MEDIUM][MANUAL]      COM objects not hijackable via HKCU\Software\Classes registry keys — CWE-427
+13.1.9  [HIGH][MANUAL]        Scheduled tasks created by app run under least-privilege account — CWE-250
+13.1.10 [MEDIUM][MANUAL]      DPAPI credentials bound to user master key; not machine-scope — CWE-312
+13.1.11 [HIGH][MANUAL]        Windows Firewall rules added by app are specific; no 0.0.0.0/0 inbound rules — NIST SC-7
+13.1.12 [HIGH][MANUAL]        AppLocker / WDAC policy not bypassable via app install directory — OW-A02
+13.1.13 [MEDIUM][MANUAL]      App does not disable UAC or modify UAC registry settings — CWE-269
+
+---- 13.2 LINUX / UNIX PERMISSIONS ----
+13.2.1  [CRITICAL][MANUAL]    App runs as dedicated low-priv service user; not root — CWE-250
+13.2.2  [HIGH][MANUAL]        Config and data files owned by service user; not world-writable — CWE-732
+13.2.3  [HIGH][MANUAL]        No SUID/SGID bit on app binaries (find / -perm /4000 -o -perm /2000) — CWE-269
+13.2.4  [HIGH][MANUAL]        Linux capabilities assigned minimally; CAP_NET_BIND instead of full root — CWE-250
+13.2.5  [HIGH][CONFIG][SCAN]  systemd unit: NoNewPrivileges=yes present — CWE-269
+13.2.6  [HIGH][CONFIG][SCAN]  systemd unit: PrivateTmp=yes, ProtectSystem=strict, ReadOnlyPaths set — OW-A02
+13.2.7  [HIGH][MANUAL]        Socket files mode 0660 or tighter; not world-accessible — CWE-732
+13.2.8  [HIGH][MANUAL]        LD_PRELOAD / LD_LIBRARY_PATH injection not possible in app context — CWE-427
+13.2.9  [CRITICAL][MANUAL]    sudo rules do not allow app user to run dangerous commands — CWE-269
+13.2.10 [HIGH][MANUAL]        Cron scripts not writable by app user or other low-priv users — CWE-732
+13.2.11 [MEDIUM][MANUAL]      Log directory not world-writable; log injection path closed — CWE-732
+13.2.12 [MEDIUM][CONFIG][SCAN]umask set to 027 or tighter in app startup — CWE-732
+13.2.13 [HIGH][CONFIG][SCAN]  AppArmor or SELinux profile present and in enforcing mode — NIST AC-3
+13.2.14 [HIGH][MANUAL]        App cannot access /proc/[pid]/mem or /dev/mem directly — CWE-250
+13.2.15 [HIGH][CONFIG][SCAN]  Bind mounts in container do not expose sensitive host paths — CWE-732
+13.2.16 [MEDIUM][MANUAL]      /tmp world-writable; app uses mkstemp() not predictable filenames — CWE-377
+
+---- 13.3 MACOS PERMISSIONS ----
+13.3.1  [CRITICAL][CONFIG][SCAN] Hardened Runtime enabled; no com.apple.security.cs.disable-library-validation — CWE-284
+13.3.2  [HIGH][CONFIG][SCAN]  App entitlements minimal; no com.apple.security.cs.allow-unsigned-executable-memory — CWE-284
+13.3.3  [HIGH][MANUAL]        TCC permissions (Full Disk Access, Camera, Mic) match actual app needs — CWE-250
+13.3.4  [HIGH][MANUAL]        LaunchAgent/Daemon plist not writable by non-root user — CWE-732
+13.3.5  [HIGH][CONFIG][SCAN]  Dylib injection prevented via code signing + library validation entitlement — CWE-427
+13.3.6  [MEDIUM][MANUAL]      App sandboxed via App Sandbox where distribution allows it — CWE-250
+
+---- 13.4 WEB APP & API PROCESS PERMISSIONS ----
+13.4.1  [CRITICAL][MANUAL]    Web process does not have write access to its own webroot — CWE-732
+13.4.2  [CRITICAL][MANUAL]    DB connection uses dedicated low-priv user; not root/DBA/sa — CWE-250
+13.4.3  [HIGH][MANUAL]        App process cannot read /etc/shadow, private keys, or other sensitive OS files — CWE-250
+13.4.4  [HIGH][MANUAL]        /tmp mounted with noexec; app cannot write+execute from temp dirs — CWE-250
+13.4.5  [CRITICAL][CONFIG][SCAN] Cloud IAM role not Admin/Owner/FullAccess; follows least privilege — NIST AC-6
+13.4.6  [CRITICAL][CONFIG][SCAN] Cloud storage buckets not publicly readable/writable without auth — OW-A02
+13.4.7  [HIGH][CONFIG][SCAN]  Service account key file not stored in application directory — CWE-798
+13.4.8  [CRITICAL][CONFIG][SCAN] AWS IMDSv2 enforced; v1 blocked at instance metadata service level — CWE-918
+13.4.9  [CRITICAL][CONFIG][SCAN] Container does not run as UID 0 (root) — CWE-250
+13.4.10 [CRITICAL][CONFIG][SCAN] Container lacks --privileged flag and host namespace sharing — CWE-250
+13.4.11 [HIGH][CONFIG][SCAN]  Kubernetes: pods use non-root securityContext; readOnlyRootFilesystem — CWE-250
+13.4.12 [HIGH][CONFIG][SCAN]  Kubernetes: NetworkPolicy restricts pod-to-pod communication — NIST SC-7
+
+---- 13.5 MOBILE APP PERMISSIONS ----
+13.5.1  [HIGH][CONFIG][SCAN]  Android: only required dangerous permissions in AndroidManifest.xml — CWE-250
+13.5.2  [HIGH][CONFIG][SCAN]  Android: exported=false on all Activity/Service/Provider not requiring it — CWE-926
+13.5.3  [HIGH][CODE][SCAN]    Android: WebView does not enable file:// access with JavaScript — CWE-79
+13.5.4  [HIGH][CONFIG][SCAN]  Android: allowBackup=false in release manifest — OW-A02
+13.5.5  [HIGH][CONFIG][SCAN]  iOS: NSAllowsArbitraryLoads=false in Info.plist — CWE-319
+13.5.6  [HIGH][CODE][SCAN]    iOS: Keychain items use kSecAttrAccessibleWhenUnlocked (not Always) — CWE-312
+13.5.7  [MEDIUM][CODE][MANUAL]Mobile: sensitive screens have screenshot protection enabled — CWE-200
+13.5.8  [HIGH][CODE][SCAN]    Mobile: clipboard not used for sensitive data (passwords, tokens) — CWE-200
+
+---- 13.6 BROWSER EXTENSION / PWA PERMISSIONS ----
+13.6.1  [HIGH][CONFIG][SCAN]  Extension manifest: permissions list minimal (no tabs, <all_urls> avoided) — CWE-250
+13.6.2  [HIGH][CONFIG][SCAN]  Content scripts restricted to specific URL match patterns — CWE-284
+13.6.3  [HIGH][CODE][SCAN]    Background service worker does not store sensitive data in extension storage — CWE-312
+13.6.4  [MEDIUM][CODE][SCAN]  Extension: message passing validates sender origin before processing — CWE-20
+
+
+SECTION 14 — PRIVACY, COMPLIANCE & DATA HANDLING
+Ref: [GDPR] [NIST SP 800-188] [CCPA]
+----------------------------------------------------------------
+14.1  [HIGH][MANUAL]          PII minimization: only data necessary for stated purpose collected — GDPR Art.5
+14.2  [HIGH][CONFIG][SCAN]    Encryption at rest: sensitive DB columns encrypted; disk volumes protected — NIST SC-28
+14.3  [HIGH][MANUAL]          GDPR rights: data export, deletion, and consent management implemented — GDPR Art.15-17
+14.4  [HIGH][CONFIG][MANUAL]  AI data retention: prompt/response log retention period defined; honored — LLM06
+14.5  [CRITICAL][CODE][SCAN]  PII in AI context: PII redacted before external LLM API calls — LLM06
+14.6  [HIGH][CONFIG][SCAN]    Audit trail: user/IP/timestamp logged for all sensitive operations — NIST AU-3
+14.7  [HIGH][MANUAL]          Third-party SDKs: analytics/error tracking data collection reviewed — GDPR Art.28
+14.8  [MEDIUM][MANUAL]        Data breach notification: process documented and tested — GDPR Art.33
+14.9  [MEDIUM][MANUAL]        Cross-border transfer: GDPR SCCs or adequacy decision in place — GDPR Ch.V
+14.10 [HIGH][CONFIG][SCAN]    Sensitive data in backups encrypted with separate key from production — NIST CP-9
+
+
+SECTION 15 — MONITORING, DETECTION & INCIDENT RESPONSE
+Ref: [OW-A09] [NIST IR-*] [NIST AU-*]
+----------------------------------------------------------------
+15.1  [HIGH][CONFIG][MANUAL]  AI usage anomaly detection: alert on unusual prompt patterns, token spikes — OW-A09
+15.2  [HIGH][CONFIG][SCAN]    Auth failure alerting: alert on N failed logins, impossible travel, new device — OW-A09
+15.3  [MEDIUM][CONFIG][MANUAL] SIEM/log aggregation: centralized structured logs with correlation rules — NIST AU-12
+15.4  [LOW][CONFIG][SCAN]     Vulnerability disclosure: security.txt at /.well-known/security.txt present — OW-A02
+15.5  [MEDIUM][MANUAL]        Incident response plan: documented playbook; tabletop exercises conducted — NIST IR-4
+15.6  [HIGH][CONFIG][SCAN]    CVE monitoring: Dependabot/Snyk automated alerts on new CVEs for dep tree — OW-A03
+15.7  [HIGH][CONFIG][MANUAL]  AI abuse monitoring: jailbreak attempt detection and logging in place — LLM01
+15.8  [MEDIUM][MANUAL]        Pentest schedule: annual minimum; after every major feature release — PTES
+15.9  [HIGH][MANUAL]          Privilege escalation alerting: runtime alerts on unexpected privilege changes — CWE-269
+15.10 [MEDIUM][MANUAL]        Honeytokens: canary API keys / credentials planted to detect theft early — NIST SC-26
+15.11 [HIGH][CONFIG][SCAN]    Runtime security: Falco/auditd rules monitor suspicious syscalls in containers — NIST AU-14
+15.12 [MEDIUM][MANUAL]        Log integrity: log tampering detection; write-once log storage configured — NIST AU-9
+
+
+================================================================
+APPENDIX A — OWASP / MITRE FRAMEWORK CROSS-REFERENCE
+================================================================
+OWASP Top 10:2025 → Checklist Sections:
+  A01 Broken Access Control          → §2, §12.3, §13
+  A02 Security Misconfiguration      → §5, §8-§11, §13
+  A03 Software Supply Chain Failures → §6
+  A04 Cryptographic Failures         → §4, §12.5
+  A05 Injection                      → §3, §12.4
+  A06 Insecure Design                → §12.7, §1.18
+  A07 Identification & Auth Failures → §1, §12.2
+  A08 Software & Data Integrity      → §6
+  A09 Security Logging & Monitoring  → §15
+  A10 Mishandling Exceptional Cond.  → §5.6, §12.6
+
+OWASP API Security Top 10:2023 → Checklist Sections:
+  API1 Broken Object Level Auth      → §2.4, §2.6, §11.25
+  API2 Broken Authentication         → §1
+  API3 Broken Object Property Auth   → §2.8
+  API4 Unrestricted Resource Cons.   → §5.5, §7.4
+  API5 Broken Function Level Auth    → §2.9, §11.22-11.28
+  API6 Unrestricted Access to Sens.  → §3, §4.7
+  API7 Server-Side Request Forgery   → §3.10
+  API8 Security Misconfiguration     → §5
+  API9 Improper Inventory Mgmt       → §2.17
+  API10 Unsafe API Consumption       → §6.7, §7.13
+
+MITRE CWE Top 25:2024 Top Entries → Checklist Sections:
+  CWE-79  XSS                        → §3.1-3.3, §12.4.3
+  CWE-89  SQLi                       → §3.4, §12.4.1
+  CWE-78  OS Command Injection        → §3.6, §12.4.2
+  CWE-787 Out-of-Bounds Write         → §12.9.1
+  CWE-125 Out-of-Bounds Read          → §12.9.2
+  CWE-416 Use After Free              → §12.9.3
+  CWE-502 Insecure Deserialization    → §3.22, §11.6
+  CWE-22  Path Traversal              → §3.12, §2.14
+  CWE-352 CSRF                        → §3.9
+  CWE-434 Unrestricted File Upload    → §3.11
+  CWE-862 Missing Authorization       → §2.1-2.9
+  CWE-476 NULL Dereference            → §12.6.4
+  CWE-190 Integer Overflow            → §3.21, §12.9.5
+  CWE-798 Hardcoded Credentials       → §4.3, §12.8
+  CWE-400 Resource Exhaustion         → §5.5, §7.4
+  CWE-732 Incorrect Permissions       → §13
+
+OWASP LLM Top 10:2025 → Checklist Sections:
+  LLM01 Prompt Injection              → §7.1, §7.2, §12.10
+  LLM02 Sensitive Info Disclosure     → §7.5, §7.11
+  LLM04 Model DoS                     → §7.4, §12.10.5
+  LLM06 Excessive Agency              → §7.3, §7.6, §7.8
+  LLM07 System Prompt Leakage         → §7.11
+  LLM08 Vector / Embedding Weakness   → §7.2
+  LLM09 Misinformation                → §7.17
+
+================================================================
+APPENDIX B — TESTING TOOLS BY CATEGORY
+================================================================
+Static Analysis (SAST):
+  semgrep          Multi-language SAST; custom rule support
+  bandit           Python security linting
+  gosec            Go security linter
+  eslint-security  JS/TS security rules
+  cargo-audit      Rust dependency CVE check
+  brakeman         Ruby on Rails SAST
+  CodeQL           GitHub semantic code analysis
+  Snyk Code        AI-assisted SAST
+
+Dynamic Analysis (DAST):
+  Burp Suite Pro   Web/API manual + automated testing
+  OWASP ZAP        Automated web scanner
+  nuclei           Template-based CVE/misconfiguration scanner
+  nikto            Web server misconfiguration scanner
+
+Injection Testing:
+  sqlmap / ghauri  SQLi automation
+  commix           OS command injection
+  tplmap           SSTI detection
+  jwt_tool         JWT attack toolkit
+
+Fuzzing:
+  ffuf / feroxbuster  Directory/parameter fuzzing
+  wfuzz            Web fuzzer
+  afl++ / LibFuzzer   Binary fuzzing (C/C++)
+  boofuzz          Network protocol fuzzing
+
+Mobile:
+  MobSF            Mobile app security framework
+  Frida            Dynamic instrumentation
+  objection        Mobile runtime exploration
+  apktool          Android APK reversing
+
+Desktop:
+  Tauri: cargo audit + npx tauri info
+  Electron: electronegativity (static analysis)
+  procmon/accesschk (Windows permissions)
+
+Secrets Scanning:
+  truffleHog       Git history secrets scan
+  gitleaks         Pre-commit + CI secrets detection
+  detect-secrets   Pre-commit hook
+
+Supply Chain:
+  trivy            Container + dependency CVE scan
+  grype            SBOM vulnerability scanner
+  syft             SBOM generator
+  OWASP Dep-Check  Dependency CVE mapping
+
+Infrastructure:
+  testssl.sh / sslyze  TLS configuration audit
+  docker-bench-security  Container hardening check
+  kube-bench       Kubernetes CIS benchmark
+  checkov          IaC security scanning
+
+Privilege Escalation:
+  LinPEAS / WinPEAS    Automated local privesc check
+  PowerSploit      Windows privilege escalation
+  GTFOBins         Linux binary abuse reference
+  icacls / accesschk   Windows permission auditing
+
+AI Red Teaming:
+  Garak            LLM vulnerability scanner
+  PyRIT            Microsoft AI Red Teaming toolkit
+  PromptBench      Adversarial prompt testing
+
+Automation/Retest:
+  Playwright       Automated browser testing / retest agent
+  Puppeteer        Headless browser automation
+
+Runtime Monitoring:
+  Falco            Container runtime security
+  auditd           Linux syscall auditing
+  osquery          OS state querying
+  Wazuh            SIEM + HIDS
+
+================================================================
+APPENDIX C — AGENT USAGE INSTRUCTIONS
+================================================================
+This checklist is designed to be consumed by automated security
+agents. Guidelines for agent implementation:
+
+OUTPUT FORMAT PER CHECK:
+  CHECK_ID   | SECTION.ITEM (e.g. "3.4")
+  STATUS     | PASS / FAIL / PARTIAL / NA / ERROR
+  SEVERITY   | CRITICAL / HIGH / MEDIUM / LOW
+  EVIDENCE   | File:line, config key, endpoint, or description
+  CWE        | CWE identifier if applicable
+  REMEDIATION| One-sentence fix guidance
+
+AGENT EXECUTION MODES:
+  [SCAN]   → Run automated tool (semgrep rule, nuclei template, etc.)
+  [CODE]   → Parse and analyze source files
+  [CONFIG] → Read and validate configuration files/manifests
+  [MANUAL] → Flag for human review; agent documents context only
+
+PRIORITY ORDER FOR AGENTS:
+  1. All CRITICAL items in §1, §2, §3, §7
+  2. All CRITICAL items in §12 (code review)
+  3. All CRITICAL items in §13 (permissions)
+  4. Framework-specific CRITICAL items for detected stack
+  5. All HIGH items across all sections
+  6. MEDIUM and LOW items
+
+STACK DETECTION HINTS:
+  Tauri:      src-tauri/tauri.conf.json present → run §9.1-9.15
+  Electron:   electron in package.json devDeps  → run §9.16-9.25
+  Flutter:    pubspec.yaml present              → run §10.1-10.10
+  React Native: metro.config.js present        → run §10.11-10.18
+  Next.js:    next.config.js present            → run §8.1-8.5
+  Django:     manage.py present                 → run §11.7-11.8
+  FastAPI:    from fastapi import FastAPI        → run §11.9
+  Spring:     pom.xml with spring-boot           → run §11.17-11.21
+  GraphQL:    schema.graphql or typeDefs present → run §11.22-11.26
+
+================================================================
+SEVERITY LEGEND:
+  CRITICAL  Immediate exploitability; RCE/data breach likely
+  HIGH      Significant risk; exploitable with moderate effort
+  MEDIUM    Requires chaining or specific conditions to exploit
+  LOW       Defense in depth; reduces attack surface over time
+================================================================
+Total checks: ~230+
+Frameworks:   OWASP Top 10:2025 · OWASP API Security Top 10:2023
+              OWASP LLM Top 10:2025 · MITRE CWE Top 25:2024
+              NIST SP 800-53 · OWASP ASVS 4.0 · PTES
+BSPLOIT · OMEGA TRUST · AI APP SECURITY AUDIT v3.0
+================================================================
