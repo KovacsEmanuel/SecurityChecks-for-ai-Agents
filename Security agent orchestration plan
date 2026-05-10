@@ -1,6 +1,5 @@
 ================================================================
 AI APPLICATION SECURITY REVIEW — ORCHESTRATION PLAN v2.0
-BSPLOIT / OMEGA TRUST
 ================================================================
 INPUTS REQUIRED:
   SOURCE_CODE_PATH : path to repo / mounted filesystem
@@ -689,6 +688,4 @@ by a certified security professional before going to production, after
 major releases, and at minimum once per year.
 
 Use these results to fix the obvious issues first. Then get a real pentest.
-================================================================
-BSPLOIT · OMEGA TRUST · AGENT ORCHESTRATION PLAN v2.0
 ================================================================
